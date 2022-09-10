@@ -18,7 +18,6 @@ jobs:
     # You might want to Checkout your repo first, but not mandatory
       - name: Installing JDK 7 + Build Dependencies
         run: |
-          tar -xvJf CM-cm-12.1-no-repo-20160728.tar.xz
           docker run --name='aosp-v5' -it --rm \
           -v ~/AOSP:/home/android/aosp \
           tedwang/aosp-v5 \

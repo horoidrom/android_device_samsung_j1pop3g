@@ -1,19 +1,56 @@
 name: TWRP CI
-
 on:
   workflow_dispatch:
-
 jobs:
-    compile:
-        name: Compile site assets
-        runs-on: ubuntu-18.04
-        steps:
-          - name: Check out the repo
-            uses: actions/checkout@v2
-          - name: Run the build process with Docker
-            uses: addnab/docker-run-action@v3
-            with:
-                image: tedwang/aosp-v5
-                options: -v ${{ github.workspace }}:/var/www
-                run: |
-                    sudo apt update
+  build:
+    name: TWRP Build CI
+    runs-on: ubuntu-16.04
+    env:
+      OEM: samsung
+      DEVICE: j1pop3g
+      BRANCH: twrp-5.1
+    steps:
+      - uses: actions/checkout@v2
+    # You might want to Checkout your repo first, but not mandatory
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+           swap-size-gb: 12
+      - name: Check Out
+        uses: actions/checkout@v3
+    # Cleanup The Actions Workspace Using Custom Composite Run Actions
+      - name: Cleanup
+        uses: rokibhasansagar/slimhub_actions@main
+      - name: Installing JDK 7 + Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python
+          sudo apt-get install openjdk-8-jdk
+          sudo apt-get install zip gcc-multilib g++-multilib \
+            libc6-dev-i386 lib32ncurses5-dev lib32z1-dev \
+            libgl1-mesa-dev libxml2-utils xsltproc schedtool axel
+          sudo apt-get install wget
+          sudo apt-get install lib32z1
+          sudo apt-get install xz-utils  
+      - name: Building TWRP
+        run: |
+          mkdir ~/5.1
+          cd ~/5.1
+          wget https://ava5.androidfilehost.com/dl/snv9J5nAdHRLnwPhStqDuQ/1662879807/24651429356503487/CM-cm-12.1-no-repo-20160728.tar.xz
+          tar -xvJf CM-cm-12.1-no-repo-20160728.tar.xz
+          sudo rm -r CM-cm-12.1-no-repo-20160728.tar.xz
+          cd CM-cm-12.1-no-repo-20160728
+          git clone https://github.com/horoidrom/dt-cm12 device/samsung/j1pop3g
+          git clone https://github.com/horoidrom/v3 vendor/samsung/j1pop3g
+          git clone https://github.com/horoidrom/android_kernel_samsung_j1pop3g kernel/samsung/j1pop3g
+          
+      - uses: actions/checkout@v2
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3.11
+        timeout-minutes: 240
+         
+      - name: Uploading TWRP builds
+        uses: actions/upload-artifact@v2
+        with:
+          name: twrp
+          path: /home/runner/TWRP/out/target/product/${{ env.DEVICE }}/.*

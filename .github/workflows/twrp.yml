@@ -54,21 +54,11 @@ jobs:
           git clone https://github.com/horoidrom/android_kernel_samsung_j1pop3g kernel/samsung/j1pop3g
 
           
-      - name: Building TWRP2
-        run: |
-         cd ~/5.1          
-         cd CM-cm-12.1-no-repo-20160728
-         OLDPATH=$PATH
-         OLDJAVAHOME=$JAVA_HOME
-         export PATH="$HOME/.jdk_7/java-se-7u75-ri/bin:$PATH"
-         export JAVA_HOME="$HOME/.jdk_7/java-se-7u75-ri"
-         source build/envsetup.sh
-         export ALLOW_MISSING_DEPENDENCIES=true
-         export LC_ALL=C
-         lunch 7
-         make
-         export PATH=$OLDPATH
-         export JAVA_HOME=$OLDJAVAHOME
+      # That's it! Now use your normal steps
+      - uses: actions/checkout@v2
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3.11
+        timeout-minutes: 240
          
       - name: Uploading TWRP builds
         uses: actions/upload-artifact@v2
